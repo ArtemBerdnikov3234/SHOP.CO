@@ -26,7 +26,7 @@
     </div>
   </section>
 </template>
-ф
+
 <script setup>
 import ProductCard from './ProductCard.vue'
 

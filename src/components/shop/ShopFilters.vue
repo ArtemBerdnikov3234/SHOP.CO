@@ -257,6 +257,7 @@ const CheckIcon = {
 const emit = defineEmits(['apply-filters', 'close-filters'])
 const productStore = useProductStore()
 
+// Состояние открытых секций
 const openSections = reactive({ categories: true, price: true, colors: true, sizes: true })
 const selectedFilters = reactive({
   categories: [],
@@ -343,6 +344,7 @@ watch(
   { immediate: true },
 )
 
+// Отображаемые категории
 const displayedCategories = computed(() =>
   showAllCategories.value
     ? availableFilters.value.categories
@@ -386,8 +388,10 @@ const validatePriceInputs = () => {
   updatePriceFromInputs()
 }
 
+// Переключение секций
 const toggleSection = (section) => (openSections[section] = !openSections[section])
 
+// Переключение фильтров
 const toggleArrayFilter = (array, value) => {
   const index = array.indexOf(value)
   if (index > -1) array.splice(index, 1)
@@ -404,6 +408,7 @@ const applyFiltersAndClose = () => {
   emit('close-filters')
 }
 
+// Применение фильтров и закрытие
 const hasActiveFilters = computed(
   () =>
     tempFilters.categories.length ||
@@ -413,6 +418,7 @@ const hasActiveFilters = computed(
     tempFilters.priceRange.max !== availableFilters.value.maxPrice,
 )
 
+// Сброс всех фильтров
 const resetAllFilters = () => {
   tempFilters.categories = []
   tempFilters.priceRange.min = availableFilters.value.minPrice
@@ -430,6 +436,7 @@ const resetAllFilters = () => {
   applyFiltersAndClose()
 }
 
+// Проверка яркости цвета
 const isLightColor = (hex) => {
   const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16))
   return (r * 299 + g * 587 + b * 114) / 1000 >= 150
@@ -437,7 +444,7 @@ const isLightColor = (hex) => {
 </script>
 
 <style>
-/* Стили для @vueform/slider */
+/* Стили для слайдера */
 .shop-price-slider {
   --slider-connect-bg: #000000;
   --slider-tooltip-bg: #000000;

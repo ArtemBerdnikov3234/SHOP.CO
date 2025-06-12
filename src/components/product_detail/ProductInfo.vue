@@ -5,6 +5,7 @@
       {{ product.name }}
     </h1>
     <div v-if="product" class="flex items-center gap-3 mb-4">
+      <!-- Блок с рейтингом (звезды) -->
       <div class="flex">
         <svg
           v-for="i in 5"
@@ -30,12 +31,14 @@
       <span class="text-black font-bold text-2xl lg:text-[32px] leading-normal">
         ₽{{ product.price }}
       </span>
+      <!-- Цена до скидки -->
       <span
         v-if="product.discount?.is_active"
         class="text-black/30 font-bold text-2xl lg:text-[32px] leading-normal line-through"
       >
         ₽{{ product.discount.original_price }}
       </span>
+      <!-- Бейдж со скидкой -->
       <div
         v-if="product.discount?.is_active"
         class="bg-red-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full"
@@ -75,7 +78,7 @@
       <SizeSelector :sizes="product.availableSizes || []" v-model="selectedSize" />
     </div>
 
-    <!-- Кнопка внизу -->
+    <!-- Кнопка "Добавить в корзину" -->
     <div v-if="product" class="mt-auto">
       <button
         class="flex items-center justify-center bg-black text-white rounded-full h-[52px] w-full px-8 py-4 font-medium text-base hover:bg-gray-800 transition-colors"
@@ -86,6 +89,7 @@
       </button>
     </div>
 
+    <!-- Состояние загрузки, пока нет данных о товаре -->
     <div v-if="!product" class="text-center py-10 text-gray-500">
       Загрузка информации о товаре...
     </div>
@@ -98,16 +102,20 @@ import ColorSelector from './ColorSelector.vue'
 import SizeSelector from './SizeSelector.vue'
 import { useCartStore } from '@/stores/cartStore'
 
+// Входной параметр: объект товара
 const props = defineProps({
   product: { type: Object, default: null },
 })
 
+// Инициализация хранилища (store) корзины
 const cartStore = useCartStore()
 
+// Реактивные переменные для хранения выбранных опций и состояния добавления в корзину
 const selectedColor = ref('')
 const selectedSize = ref('')
 const isAddingToCart = ref(false)
 
+// Вычисляемое свойство для получения полного объекта выбранного цвета
 const currentSelectedColorObject = computed(() => {
   if (!props.product || !props.product.colors || !selectedColor.value) {
     return null
@@ -115,10 +123,10 @@ const currentSelectedColorObject = computed(() => {
   return props.product.colors.find((c) => c.hex === selectedColor.value)
 })
 
+// Наблюдатель за `props.product` для установки значений по умолчанию при загрузке данных
 watch(
   () => props.product,
   (newProduct) => {
-    console.log('ProductInfo: product prop changed:', newProduct)
     if (newProduct) {
       selectedColor.value = newProduct.colors?.[0]?.hex || ''
       selectedSize.value = newProduct.availableSizes?.[0] || ''
@@ -130,14 +138,14 @@ watch(
   { immediate: true, deep: true },
 )
 
+// Функция-обработчик для добавления товара в корзину
 const handleAddToCart = async () => {
-  console.log('ProductInfo: handleAddToCart CALLED')
   if (!props.product) {
-    console.error('ProductInfo: Cannot add to cart, props.product is null.')
     alert('Информация о товаре еще не загружена.')
     return
   }
 
+  // Проверки на выбор цвета и размера
   if (props.product.colors && props.product.colors.length > 0 && !selectedColor.value) {
     alert('Пожалуйста, выберите цвет.')
     return
@@ -153,12 +161,14 @@ const handleAddToCart = async () => {
 
   isAddingToCart.value = true
 
+  // Определение URL изображения для корзины (может меняться в зависимости от цвета)
   let itemImageUrl = props.product.imageUrl
   const colorObject = currentSelectedColorObject.value
   if (colorObject && colorObject.image) {
     itemImageUrl = colorObject.image
   }
 
+  // Создание объекта товара для добавления в корзину
   const itemToAdd = {
     productId: props.product.id,
     name: props.product.name,
@@ -170,12 +180,13 @@ const handleAddToCart = async () => {
     quantity: 1,
   }
 
-  console.log('ProductInfo: Item to add:', itemToAdd)
-
+  // Вызов метода из хранилища для добавления товара
   try {
     await cartStore.addItemToCart(itemToAdd)
     alert(
-      `Товар "${props.product.name}" (${itemToAdd.color || selectedColor.value}, ${itemToAdd.size}) добавлен в корзину!`,
+      `Товар "${props.product.name}" (${itemToAdd.color || selectedColor.value}, ${
+        itemToAdd.size
+      }) добавлен в корзину!`,
     )
   } catch (error) {
     console.error('ProductInfo: Error adding item to cart:', error)

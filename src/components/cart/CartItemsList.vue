@@ -8,17 +8,10 @@
       <div class="text-center">Количество</div>
       <div class="text-center">Сумма</div>
       <div></div>
-      <!-- Пустая ячейка для кнопки удаления -->
     </div>
 
     <!-- Список товаров -->
-    <div v-if="cartStore.isLoading && cartStore.cartItems.length === 0" class="text-center py-10">
-      Загрузка товаров корзины...
-    </div>
-    <div v-else-if="cartStore.error" class="text-center py-10 text-red-500">
-      Ошибка загрузки корзины: {{ cartStore.error }}
-    </div>
-    <div v-else-if="!cartStore.isEmpty">
+    <div v-if="!cartStore.isEmpty">
       <CartItem v-for="item in cartStore.cartItems" :key="item.id" :item="item" />
     </div>
     <div v-else class="py-10 text-center text-xl text-black/60">
@@ -35,10 +28,4 @@ import { useCartStore } from '@/stores/cartStore'
 import CartItem from './CartItem.vue'
 
 const cartStore = useCartStore()
-
-// Загрузка корзины при монтировании компонента, если она пуста
-
-if (cartStore.items.length === 0) {
-  cartStore.fetchCartItems()
-}
 </script>

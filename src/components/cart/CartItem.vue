@@ -3,7 +3,7 @@
     v-if="item"
     class="grid grid-cols-[auto_1fr_auto_auto_auto_auto] lg:grid-cols-[100px_1fr_100px_150px_100px_50px] items-center gap-4 py-4 border-b border-gray-200"
   >
-    <!-- Изображение -->
+    <!-- Изображение товара -->
     <img
       :src="item.imageUrl || 'https://via.placeholder.com/80'"
       alt="item.name"
@@ -20,10 +20,10 @@
       </p>
     </div>
 
-    <!-- Цена -->
+    <!-- Цена товара -->
     <div class="text-sm md:text-base text-black text-center">₽{{ item.price.toFixed(2) }}</div>
 
-    <!-- Количество -->
+    <!-- Управление количеством -->
     <div class="flex items-center justify-center gap-2">
       <button
         @click="decrementQuantity"
@@ -42,12 +42,12 @@
       </button>
     </div>
 
-    <!-- Сумма -->
+    <!-- Общая сумма -->
     <div class="text-sm md:text-base font-semibold text-black text-center">
       ₽{{ (item.price * item.quantity).toFixed(2) }}
     </div>
 
-    <!-- Удалить -->
+    <!-- Кнопка удаления -->
     <button
       @click="removeItem"
       class="text-red-500 hover:text-red-700 transition-colors p-2 justify-self-center"
@@ -81,10 +81,12 @@ const props = defineProps({
 
 const cartStore = useCartStore()
 
+// Увеличение количества товара
 const incrementQuantity = () => {
   cartStore.updateItemQuantity(props.item.id, props.item.quantity + 1)
 }
 
+// Уменьшение количества товара
 const decrementQuantity = () => {
   if (props.item.quantity > 1) {
     cartStore.updateItemQuantity(props.item.id, props.item.quantity - 1)
@@ -93,6 +95,7 @@ const decrementQuantity = () => {
   }
 }
 
+// Удаление товара из корзины
 const removeItem = () => {
   if (confirm(`Вы уверены, что хотите удалить "${props.item.name}" из корзины?`)) {
     cartStore.removeItemFromCart(props.item.id)

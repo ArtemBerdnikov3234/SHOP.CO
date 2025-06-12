@@ -4,13 +4,10 @@ import { ref, computed } from 'vue'
 const CART_API_URL = 'https://fd08c3fca32debb9.mokky.dev/Cart'
 
 export const useCartStore = defineStore('cart', () => {
-  // --- State ---
-  const items = ref([]) // Товары в корзине
-  const isLoading = ref(false)
-  const error = ref(null)
-  const isInitialized = ref(false) // Флаг инициализации
+  // --- Состояние ---
+  const items = ref([])
 
-  // --- Getters ---
+  // --- Геттеры ---
   const cartItems = computed(() => items.value)
   const cartTotalQuantity = computed(() => {
     return items.value.reduce((total, item) => total + item.quantity, 0)
@@ -20,143 +17,82 @@ export const useCartStore = defineStore('cart', () => {
   })
   const isEmpty = computed(() => items.value.length === 0)
 
-  // --- Actions ---
+  // --- Действия ---
 
-  /**
-   * Загружает товары из корзины с API.
-   */
+  // Загружает товары из корзины с API
   async function fetchCartItems() {
-    if (isInitialized.value) return // Если уже загружены, не перезагружать
-    isLoading.value = true
-    error.value = null
-    try {
-      const response = await fetch(CART_API_URL)
-      if (!response.ok) {
-        throw new Error(`Ошибка сети: ${response.statusText}`)
-      }
-      items.value = await response.json()
-      isInitialized.value = true
-    } catch (e) {
-      error.value = e.message
-      console.error('Ошибка при загрузке корзины:', e)
-    } finally {
-      isLoading.value = false
-    }
+    const response = await fetch(CART_API_URL)
+    items.value = await response.json()
   }
 
-  /**
-   * Принудительно обновляет данные корзины с сервера
-   */
+  // Принудительно обновляет данные корзины с сервера
   async function refreshCartItems() {
-    isInitialized.value = false
     await fetchCartItems()
   }
 
+  // Добавляет товар в корзину
   async function addItemToCart(productDetails) {
-    isLoading.value = true
-    error.value = null
-    try {
-      // Проверяем, есть ли уже такой товар (с таким же productId, цветом и размером)
-      const existingItemIndex = items.value.findIndex(
-        (item) =>
-          item.productId === productDetails.productId &&
-          item.color === productDetails.color &&
-          item.size === productDetails.size,
-      )
+    const existingItemIndex = items.value.findIndex(
+      (item) =>
+        item.productId === productDetails.productId &&
+        item.color === productDetails.color &&
+        item.size === productDetails.size,
+    )
 
-      if (existingItemIndex > -1) {
-        // Если товар уже есть, увеличиваем его количество
-        const existingItem = items.value[existingItemIndex]
-        const newQuantity = existingItem.quantity + productDetails.quantity
-        const response = await fetch(`${CART_API_URL}/${existingItem.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ quantity: newQuantity }),
-        })
-        if (!response.ok) {
-          throw new Error('Не удалось обновить количество товара в корзине на сервере')
-        }
-        const updatedItem = await response.json()
-        items.value[existingItemIndex] = updatedItem
-      } else {
-        // Если товара нет, добавляем новый
-        const response = await fetch(CART_API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(productDetails),
-        })
-        if (!response.ok) {
-          throw new Error('Не удалось добавить товар в корзину на сервере')
-        }
-        const newItem = await response.json()
-        items.value.push(newItem)
-      }
-    } catch (e) {
-      error.value = e.message
-      console.error('Ошибка при добавлении в корзину:', e)
-      // re-throw the error so the component can catch it
-      throw e
-    } finally {
-      isLoading.value = false
-    }
-  }
-
-  async function removeItemFromCart(cartItemId) {
-    isLoading.value = true
-    error.value = null
-    try {
-      const response = await fetch(`${CART_API_URL}/${cartItemId}`, {
-        method: 'DELETE',
+    if (existingItemIndex > -1) {
+      // Если товар уже есть, обновляем его количество
+      const existingItem = items.value[existingItemIndex]
+      const newQuantity = existingItem.quantity + productDetails.quantity
+      const response = await fetch(`${CART_API_URL}/${existingItem.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quantity: newQuantity }),
       })
-      if (!response.ok) {
-        throw new Error('Не удалось удалить товар из корзины на сервере')
-      }
-      items.value = items.value.filter((item) => item.id !== cartItemId)
-    } catch (e) {
-      error.value = e.message
-      console.error('Ошибка при удалении из корзины:', e)
-    } finally {
-      isLoading.value = false
+      const updatedItem = await response.json()
+      items.value[existingItemIndex] = updatedItem
+    } else {
+      // Если товара нет, добавляем новый
+      const response = await fetch(CART_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(productDetails),
+      })
+      const newItem = await response.json()
+      items.value.push(newItem)
     }
   }
 
+  // Удаляет товар из корзины
+  async function removeItemFromCart(cartItemId) {
+    await fetch(`${CART_API_URL}/${cartItemId}`, {
+      method: 'DELETE',
+    })
+    items.value = items.value.filter((item) => item.id !== cartItemId)
+  }
+
+  // Обновляет количество товара в корзине
   async function updateItemQuantity(cartItemId, quantity) {
     if (quantity < 1) {
       await removeItemFromCart(cartItemId)
       return
     }
-    isLoading.value = true
-    error.value = null
-    try {
-      const response = await fetch(`${CART_API_URL}/${cartItemId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ quantity }),
-      })
-      if (!response.ok) {
-        throw new Error('Не удалось обновить количество товара на сервере')
-      }
-      const updatedItem = await response.json()
-      const index = items.value.findIndex((item) => item.id === cartItemId)
-      if (index !== -1) {
-        items.value[index] = updatedItem
-      }
-    } catch (e) {
-      error.value = e.message
-      console.error('Ошибка при обновлении количества:', e)
-    } finally {
-      isLoading.value = false
+    const response = await fetch(`${CART_API_URL}/${cartItemId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ quantity }),
+    })
+    const updatedItem = await response.json()
+    const index = items.value.findIndex((item) => item.id === cartItemId)
+    if (index !== -1) {
+      items.value[index] = updatedItem
     }
   }
 
-  // Автоматическая загрузка при создании store
+  // Автоматическая загрузка данных корзины при создании store
   fetchCartItems()
 
   return {
     items,
-    isLoading,
-    error,
-    isInitialized,
     cartItems,
     cartTotalQuantity,
     cartSubtotal,

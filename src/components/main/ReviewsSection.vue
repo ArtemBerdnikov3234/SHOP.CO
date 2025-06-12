@@ -1,21 +1,22 @@
 <template>
   <section class="py-12 sm:py-16 bg-white">
     <div class="container mx-auto max-w-7xl">
+      <!-- Заголовок -->
       <h2
         class="text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-10 sm:mb-14 px-4 text-black"
       >
         ОТЗЫВЫ НАШИХ КЛИЕНТОВ
       </h2>
       <div class="relative px-10 sm:px-12 md:px-16">
-        <!-- Контейнер для отзывов с горизонтальной прокруткой -->
+        <!-- Контейнер для отзывов -->
         <div
           ref="reviewsContainer"
           class="flex overflow-x-auto pb-6 space-x-4 sm:space-x-6 snap-x snap-mandatory scrollbar-hide px-2"
           @scroll="updateScrollState"
         >
-          <!-- Невидимый элемент для отступа слева -->
           <div class="shrink-0 w-2"></div>
 
+          <!-- Карточки отзывов -->
           <ReviewCard
             v-for="(review, index) in reviews"
             :key="review.id || index"
@@ -23,7 +24,6 @@
             class="snap-center sm:snap-start shrink-0"
           />
 
-          <!-- Невидимый элемент для отступа справа -->
           <div class="shrink-0 w-2"></div>
         </div>
 
@@ -105,13 +105,13 @@ const updateScrollState = () => {
   clientWidth.value = container.clientWidth
 }
 
-// Вычисляемые свойства для определения возможности прокрутки
+// Проверка возможности прокрутки
 const hasOverflow = computed(() => scrollWidth.value > clientWidth.value)
 const canScrollLeft = computed(() => scrollLeft.value > 0)
 const canScrollRight = computed(() => scrollLeft.value < scrollWidth.value - clientWidth.value - 1)
 const showNavButtons = computed(() => props.reviews.length > 0 && hasOverflow.value)
 
-// Функции прокрутки
+// Прокрутка назад
 const scrollPrev = () => {
   if (!reviewsContainer.value || !canScrollLeft.value) return
 
@@ -123,6 +123,7 @@ const scrollPrev = () => {
   })
 }
 
+// Прокрутка вперед
 const scrollNext = () => {
   if (!reviewsContainer.value || !canScrollRight.value) return
 
@@ -133,7 +134,7 @@ const scrollNext = () => {
   })
 }
 
-// Вычисление размера прокрутки на основе первой карточки
+// Вычисление размера прокрутки
 const getScrollAmount = () => {
   const firstCard = reviewsContainer.value?.querySelector('.snap-center')
   if (firstCard) {
@@ -143,6 +144,7 @@ const getScrollAmount = () => {
   }
 }
 
+// Инициализация и обработка событий
 onMounted(() => {
   nextTick(updateScrollState)
   window.addEventListener('resize', updateScrollState)
@@ -152,7 +154,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', updateScrollState)
 })
 
-// Отслеживание изменений в массиве отзывов
+// Отслеживание изменений отзывов
 watch(
   () => props.reviews,
   () => {

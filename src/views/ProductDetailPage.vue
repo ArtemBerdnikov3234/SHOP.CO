@@ -48,13 +48,19 @@ import ProductImageGallery from '@/components/product_detail/ProductImageGallery
 import ProductInfo from '@/components/product_detail/ProductInfo.vue'
 import ProductReviewsSection from '@/components/product_detail/ProductReviewsSection.vue'
 
+// Текущий маршрут и ID товара
 const route = useRoute()
 const currentProductId = ref(route.params.id)
+
+// Хранилище продуктов
 const productStore = useProductStore()
+
+// Данные о продукте, загрузка, ошибки
 const product = computed(() => productStore.getProductById(currentProductId.value))
 const isLoading = computed(() => productStore.isLoading)
 const error = computed(() => productStore.error)
 
+// Отслеживание изменения ID
 watch(
   () => route.params.id,
   (newId) => {
@@ -64,11 +70,15 @@ watch(
     }
   },
 )
+
+// Загрузка данных о продукте
 const ensureProductData = () => {
   if (productStore.products.length === 0 || !productStore.getProductById(currentProductId.value)) {
     productStore.fetchAllProducts()
   }
 }
+
+// Загрузка при монтировании
 onMounted(() => {
   ensureProductData()
 })

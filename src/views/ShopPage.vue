@@ -170,20 +170,26 @@
 </template>
 
 <script setup>
+// Импорт функций и компонентов
 import { ref, computed, onMounted, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProductStore } from '@/stores/productStore'
 import ProductCard from '@/components/main/ProductCard.vue'
 import ShopFilters from '@/components/shop/ShopFilters.vue'
 
+// Роутер и хранилище
 const router = useRouter()
 const productStore = useProductStore()
 
+// Кол-во продуктов за раз и сортировка
 const itemsPerLoad = 9
 const displayedCount = ref(itemsPerLoad)
 const currentSort = ref('default')
+
+// Мобильные фильтры
 const showMobileFilters = ref(false)
 
+// Активные фильтры
 const activeFilters = reactive({
   categories: [],
   priceRange: { min: null, max: null },
@@ -191,13 +197,16 @@ const activeFilters = reactive({
   sizes: [],
 })
 
+// Применение фильтров
 const handleApplyFilters = (newFilters) => {
   Object.assign(activeFilters, newFilters)
   displayedCount.value = itemsPerLoad
 }
 
+// Статус загрузки
 const isLoading = computed(() => productStore.isLoading)
 
+// Фильтрованные продукты (основной фильтр)
 const filteredProducts = computed(() => {
   let products = [...productStore.allProducts]
   if (activeFilters.categories.length > 0) {
@@ -228,6 +237,7 @@ const filteredProducts = computed(() => {
   return products
 })
 
+// Отсортированные продукты
 const filteredAndSortedProducts = computed(() => {
   const productsToSort = [...filteredProducts.value]
   switch (currentSort.value) {
@@ -244,24 +254,29 @@ const filteredAndSortedProducts = computed(() => {
   }
 })
 
+// Список продуктов для отображения (берёт только часть из отфильтрованных и отсортированных)
 const paginatedProducts = computed(() => {
   return filteredAndSortedProducts.value.slice(0, displayedCount.value)
 })
 
+// Возможность загрузить еще
 const canLoadMorePaginated = computed(() => {
   return !isLoading.value && displayedCount.value < filteredAndSortedProducts.value.length
 })
 
+// Загрузка дополнительных продуктов
 const loadMorePaginatedProducts = () => {
   if (canLoadMorePaginated.value) {
     displayedCount.value += itemsPerLoad
   }
 }
 
+// Переход на страницу продукта
 const handleSelectProduct = (product) => {
   router.push({ name: 'ProductDetail', params: { id: product.id } })
 }
 
+// Проверка активных фильтров
 const hasActiveFilters = computed(() => {
   const defaultMin =
     productStore.allProducts.length > 0
@@ -281,6 +296,7 @@ const hasActiveFilters = computed(() => {
   )
 })
 
+// Сброс фильтров
 const clearAllActiveFilters = () => {
   const defaultMin =
     productStore.allProducts.length > 0
@@ -299,6 +315,7 @@ const clearAllActiveFilters = () => {
   })
 }
 
+// Загрузка продуктов при монтировании
 onMounted(() => {
   if (productStore.allProducts.length === 0) {
     productStore.fetchAllProducts()
