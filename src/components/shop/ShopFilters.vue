@@ -289,7 +289,7 @@ const priceFormat = (value) => `${Math.round(value)} ₽`
 const availableFilters = computed(() => {
   const products = productStore.allProducts
   const categories = new Set()
-  const colors = new Set()
+  const colorMap = new Map()
   const sizes = new Set()
   let minPrice = Infinity,
     maxPrice = 0
@@ -300,7 +300,14 @@ const availableFilters = computed(() => {
       minPrice = Math.min(minPrice, p.price)
       maxPrice = Math.max(maxPrice, p.price)
     }
-    if (p.colors) p.colors.forEach((c) => colors.add(JSON.stringify(c)))
+
+    if (p.colors) {
+      p.colors.forEach((c) => {
+        if (c && c.hex && !colorMap.has(c.hex)) {
+          colorMap.set(c.hex, c)
+        }
+      })
+    }
     if (p.availableSizes) p.availableSizes.forEach((s) => sizes.add(s))
   })
 
@@ -311,9 +318,9 @@ const availableFilters = computed(() => {
       .sort((a, b) => a.name.localeCompare(b.name)),
     minPrice: minPrice === Infinity ? 0 : Math.floor(minPrice / 100) * 100,
     maxPrice: maxPrice === 0 ? 10000 : Math.ceil(maxPrice / 100) * 100,
-    colors: [...colors]
-      .map((c) => JSON.parse(c))
-      .sort((a, b) => (a.name || '').localeCompare(b.name || '')),
+    colors: Array.from(colorMap.values()).sort((a, b) =>
+      (a.name || '').localeCompare(b.name || ''),
+    ),
     sizes: [...sizes].sort((a, b) => sizeOrder.indexOf(a) - sizeOrder.indexOf(b)),
   }
 })
