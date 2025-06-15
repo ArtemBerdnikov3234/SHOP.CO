@@ -4,7 +4,6 @@
       <div
         class="flex items-center space-x-14 sm:space-x-18 md:space-x-24 lg:space-x-28 overflow-x-auto scrollbar-hide py-2"
       >
-        <!-- Логотип 1 -->
         <div class="brand-logo shrink-0">
           <svg
             class="h-6 sm:h-7 md:h-8 text-white opacity-80 hover:opacity-100 transition-opacity"
@@ -19,7 +18,6 @@
             />
           </svg>
         </div>
-        <!-- Логотип 2 -->
         <div class="brand-logo shrink-0">
           <svg
             class="h-7 sm:h-8 md:h-9 text-white opacity-80 hover:opacity-100 transition-opacity"
@@ -32,7 +30,6 @@
             />
           </svg>
         </div>
-        <!-- Логотип 3 -->
         <div class="brand-logo shrink-0">
           <svg
             class="h-6 sm:h-7 md:h-8 text-white opacity-80 hover:opacity-100 transition-opacity"
@@ -45,7 +42,6 @@
             />
           </svg>
         </div>
-        <!-- Логотип 4 -->
         <div class="brand-logo shrink-0">
           <svg
             class="h-6 sm:h-7 md:h-8 text-white opacity-80 hover:opacity-100 transition-opacity"
@@ -62,7 +58,6 @@
             />
           </svg>
         </div>
-        <!-- Логотип 5 -->
         <div class="brand-logo shrink-0">
           <svg
             class="h-6 sm:h-7 md:h-8 text-white opacity-80 hover:opacity-100 transition-opacity"
@@ -89,8 +84,5 @@
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
-}
-.brand-logo svg {
-  max-width: none;
 }
 </style>

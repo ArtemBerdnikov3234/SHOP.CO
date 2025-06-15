@@ -2,13 +2,10 @@
   <header class="py-5">
     <div class="container mx-auto max-w-7xl px-4 md:px-6">
       <div class="flex items-center justify-between gap-10 flex-col md:flex-row">
-        <!-- Логотип -->
-
         <router-link :to="{ name: 'Home' }" class="text-3xl font-bold text-black no-underline">
           SHOP.CO
         </router-link>
 
-        <!-- Навигация -->
         <nav class="flex items-center gap-6 order-3 w-full justify-center md:order-none md:w-auto">
           <router-link
             :to="{ name: 'Shop' }"
@@ -16,30 +13,17 @@
           >
             Магазин
           </router-link>
-          <a
-            href="#"
-            class="text-black text-base hover:text-gray-600 transition-colors duration-300"
-            @click.prevent="emit('navigate', 'sale')"
-          >
+          <a class="text-black text-base hover:text-gray-600 transition-colors duration-300">
             Распродажа
           </a>
-          <a
-            href="#"
-            class="text-black text-base hover:text-gray-600 transition-colors duration-300"
-            @click.prevent="emit('navigate', 'new')"
-          >
+          <a class="text-black text-base hover:text-gray-600 transition-colors duration-300">
             Новые поступления
           </a>
-          <a
-            href="#"
-            class="text-black text-base hover:text-gray-600 transition-colors duration-300"
-            @click.prevent="emit('navigate', 'brands')"
-          >
+          <a class="text-black text-base hover:text-gray-600 transition-colors duration-300">
             Бренды
           </a>
         </nav>
 
-        <!-- Поиск -->
         <div class="relative flex-1 max-w-[577px] w-full order-2 md:order-none">
           <svg
             class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-hover-gray"
@@ -58,14 +42,10 @@
             type="text"
             placeholder="Поиск товаров"
             class="w-full py-3 pl-12 pr-4 rounded-full text-base focus:outline-none focus:ring-2 focus:ring-custom-gray bg-custom-bg"
-            v-model="localSearchQuery"
-            @input="emit('search', localSearchQuery)"
           />
         </div>
 
-        <!-- Иконки корзины и профиля -->
         <div class="flex gap-3.5 order-1 md:order-none">
-          <!-- Ссылка на корзину -->
           <router-link
             :to="{ name: 'Cart' }"
             class="p-2 bg-transparent border-none cursor-pointer relative"
@@ -83,12 +63,11 @@
                 fill="black"
               />
             </svg>
-            <!-- Счетчик товаров в корзине -->
             <span
-              v-if="cartStore.cartTotalQuantity > 0"
+              v-if="cartStore.totalQuantity > 0"
               class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center leading-none"
             >
-              {{ cartStore.cartTotalQuantity }}
+              {{ cartStore.totalQuantity }}
             </span>
           </router-link>
 
@@ -117,11 +96,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
 import { useCartStore } from '@/stores/cartStore'
 
-const localSearchQuery = ref('')
 const cartStore = useCartStore()
-
-const emit = defineEmits(['navigate', 'search', 'toggle-profile'])
 </script>

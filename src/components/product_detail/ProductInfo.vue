@@ -1,11 +1,9 @@
 <template>
   <div class="w-full flex flex-col h-full">
-    <!-- Название и рейтинг -->
     <h1 v-if="product" class="text-black font-bold text-3xl lg:text-4xl leading-tight mb-2">
       {{ product.name }}
     </h1>
     <div v-if="product" class="flex items-center gap-3 mb-4">
-      <!-- Блок с рейтингом (звезды) -->
       <div class="flex">
         <svg
           v-for="i in 5"
@@ -26,19 +24,18 @@
       </p>
     </div>
 
-    <!-- Цена -->
     <div v-if="product" class="flex items-center gap-3 mb-5">
       <span class="text-black font-bold text-2xl lg:text-[32px] leading-normal">
         ₽{{ product.price }}
       </span>
-      <!-- Цена до скидки -->
+
       <span
         v-if="product.discount?.is_active"
         class="text-black/30 font-bold text-2xl lg:text-[32px] leading-normal line-through"
       >
         ₽{{ product.discount.original_price }}
       </span>
-      <!-- Бейдж со скидкой -->
+
       <div
         v-if="product.discount?.is_active"
         class="bg-red-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full"
@@ -49,7 +46,6 @@
       </div>
     </div>
 
-    <!-- Описание -->
     <p
       v-if="product && product.description"
       class="text-black/60 font-normal text-base leading-[22px] mb-6"
@@ -57,7 +53,6 @@
       {{ product.description }}
     </p>
 
-    <!-- Разделитель -->
     <div
       v-if="
         product &&
@@ -66,19 +61,16 @@
       class="w-full h-px bg-gray-200 mb-6"
     ></div>
 
-    <!-- Выбор цвета -->
     <div v-if="product && product.colors && product.colors.length > 0" class="mb-6">
       <p class="text-black/60 font-normal text-base mb-3">Выберите цвет</p>
       <ColorSelector :colors="product.colors || []" v-model="selectedColor" />
     </div>
 
-    <!-- Выбор размера -->
     <div v-if="product && product.availableSizes && product.availableSizes.length > 0" class="mb-6">
       <p class="text-black/60 font-normal text-base mb-3">Выберите размер</p>
       <SizeSelector :sizes="product.availableSizes || []" v-model="selectedSize" />
     </div>
 
-    <!-- Кнопка "Добавить в корзину" -->
     <div v-if="product" class="mt-auto">
       <button
         class="flex items-center justify-center bg-black text-white rounded-full h-[52px] w-full px-8 py-4 font-medium text-base hover:bg-gray-800 transition-colors"
@@ -89,7 +81,6 @@
       </button>
     </div>
 
-    <!-- Состояние загрузки, пока нет данных о товаре -->
     <div v-if="!product" class="text-center py-10 text-gray-500">
       Загрузка информации о товаре...
     </div>
@@ -102,20 +93,16 @@ import ColorSelector from './ColorSelector.vue'
 import SizeSelector from './SizeSelector.vue'
 import { useCartStore } from '@/stores/cartStore'
 
-// Входной параметр: объект товара
 const props = defineProps({
   product: { type: Object, default: null },
 })
 
-// Инициализация хранилища (store) корзины
 const cartStore = useCartStore()
 
-// Реактивные переменные для хранения выбранных опций и состояния добавления в корзину
 const selectedColor = ref('')
 const selectedSize = ref('')
 const isAddingToCart = ref(false)
 
-// Вычисляемое свойство для получения полного объекта выбранного цвета
 const currentSelectedColorObject = computed(() => {
   if (!props.product || !props.product.colors || !selectedColor.value) {
     return null
@@ -123,7 +110,6 @@ const currentSelectedColorObject = computed(() => {
   return props.product.colors.find((c) => c.hex === selectedColor.value)
 })
 
-// Наблюдатель за `props.product` для установки значений по умолчанию при загрузке данных
 watch(
   () => props.product,
   (newProduct) => {
@@ -138,37 +124,15 @@ watch(
   { immediate: true, deep: true },
 )
 
-// Функция-обработчик для добавления товара в корзину
 const handleAddToCart = async () => {
-  if (!props.product) {
-    alert('Информация о товаре еще не загружена.')
-    return
-  }
-
-  // Проверки на выбор цвета и размера
-  if (props.product.colors && props.product.colors.length > 0 && !selectedColor.value) {
-    alert('Пожалуйста, выберите цвет.')
-    return
-  }
-  if (
-    props.product.availableSizes &&
-    props.product.availableSizes.length > 0 &&
-    !selectedSize.value
-  ) {
-    alert('Пожалуйста, выберите размер.')
-    return
-  }
-
   isAddingToCart.value = true
 
-  // Определение URL изображения для корзины (может меняться в зависимости от цвета)
   let itemImageUrl = props.product.imageUrl
   const colorObject = currentSelectedColorObject.value
   if (colorObject && colorObject.image) {
     itemImageUrl = colorObject.image
   }
 
-  // Создание объекта товара для добавления в корзину
   const itemToAdd = {
     productId: props.product.id,
     name: props.product.name,
@@ -180,19 +144,7 @@ const handleAddToCart = async () => {
     quantity: 1,
   }
 
-  // Вызов метода из хранилища для добавления товара
-  try {
-    await cartStore.addItemToCart(itemToAdd)
-    alert(
-      `Товар "${props.product.name}" (${itemToAdd.color || selectedColor.value}, ${
-        itemToAdd.size
-      }) добавлен в корзину!`,
-    )
-  } catch (error) {
-    console.error('ProductInfo: Error adding item to cart:', error)
-    alert('Произошла ошибка при добавлении товара в корзину. Попробуйте еще раз.')
-  } finally {
-    isAddingToCart.value = false
-  }
+  await cartStore.addItem(itemToAdd)
+  isAddingToCart.value = false
 }
 </script>

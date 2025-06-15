@@ -12,17 +12,17 @@ export default {
     },
     extend: {
       colors: {
-        'hover-gray': '#6B7280', // Пользовательский цвет для text-hover-gray
-        'custom-gray': '#D1D5DB', // Пользовательский цвет для focus:ring-custom-gray
+        'hover-gray': '#6B7280',
+        'custom-gray': '#D1D5DB',
       },
       backgroundColor: {
-        'custom-bg': '#f0f0f0', // Пользовательский цвет фона для input
+        'custom-bg': '#f0f0f0',
       },
       maxWidth: {
-        577: '577px', // Пользовательское значение для max-w-[577px]
+        577: '577px',
       },
       gap: {
-        3.5: '0.875rem', // gap-3.5, уточнение значения (уже есть в Tailwind)
+        3.5: '0.875rem',
       },
     },
   },

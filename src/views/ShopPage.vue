@@ -52,7 +52,7 @@
       </div>
 
       <div class="flex flex-col md:flex-row md:items-start gap-x-6 lg:gap-x-8">
-        <!-- Фильтры (сайдбар) -->
+        <!-- Фильтры -->
         <div
           v-if="showMobileFilters"
           class="fixed inset-0 z-30 bg-black bg-opacity-50 md:hidden"
@@ -68,16 +68,13 @@
         >
           <div class="md:sticky md:top-24 md:self-start">
             <ShopFilters
-              v-if="productStore.allProducts.length > 0 || productStore.isLoading"
               @apply-filters="handleApplyFilters"
               @close-filters="showMobileFilters = false"
-              class="md:max-w-xs w-full"
             />
-            <div v-else class="p-5 text-gray-500 md:w-72">Загрузка опций фильтра...</div>
           </div>
         </aside>
 
-        <!-- Основной контент: Заголовок, Сортировка и Сетка товаров -->
+        <!-- Основной контент -->
         <div class="flex-grow mt-8 md:mt-0">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
             <h1 class="text-3xl sm:text-4xl font-bold text-black mb-4 sm:mb-0">Все товары</h1>
@@ -85,11 +82,8 @@
               class="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto"
             >
               <p class="text-black/60 text-sm whitespace-nowrap order-2 sm:order-1">
-                Показано {{ paginatedProducts.length }} из {{ filteredAndSortedProducts.length }}
-                <span v-if="filteredAndSortedProducts.length !== productStore.allProducts.length">
-                  (всего {{ productStore.allProducts.length }})
-                </span>
-                товаров
+                Показано {{ paginatedProducts.length }} из
+                {{ filteredAndSortedProducts.length }} товаров
               </p>
               <div class="relative w-full sm:w-auto order-1 sm:order-2">
                 <select
@@ -119,11 +113,8 @@
             </div>
           </div>
 
-          <!-- Сетка товаров -->
-          <div
-            v-if="isLoading && filteredAndSortedProducts.length === 0 && !productStore.error"
-            class="text-center py-20"
-          >
+          <!-- Товары -->
+          <div v-if="isLoading" class="text-center py-20">
             <p class="text-xl">Загрузка товаров...</p>
           </div>
           <div v-else-if="productStore.error" class="text-center py-20 text-red-500">
@@ -131,10 +122,7 @@
           </div>
           <div
             v-else-if="paginatedProducts.length > 0"
-            class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6"
-            :class="
-              showMobileFilters ? 'md:grid-cols-2 lg:grid-cols-2' : 'md:grid-cols-2 lg:grid-cols-3'
-            "
+            class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6"
           >
             <ProductCard
               v-for="product in paginatedProducts"
@@ -143,24 +131,17 @@
               @select-product="handleSelectProduct"
             />
           </div>
-          <div v-else-if="!isLoading" class="text-center py-20">
-            <p class="text-xl text-gray-600">Товары, соответствующие вашим фильтрам, не найдены.</p>
-            <button
-              v-if="hasActiveFilters"
-              @click="clearAllActiveFilters"
-              class="mt-4 px-6 py-2 bg-black text-white rounded-full text-sm"
-            >
-              Сбросить все фильтры
-            </button>
+          <div v-else class="text-center py-20">
+            <p class="text-xl text-gray-600">Товары не найдены</p>
           </div>
 
-          <div v-if="canLoadMorePaginated" class="mt-12 text-center">
+          <!-- Кнопка "Загрузить еще" -->
+          <div v-if="canLoadMore" class="mt-12 text-center">
             <button
-              @click="loadMorePaginatedProducts"
+              @click="loadMoreProducts"
               class="px-8 py-3 border border-gray-300 rounded-full text-black hover:bg-gray-100 transition-colors"
-              :disabled="isLoading"
             >
-              {{ isLoading ? 'Загрузка...' : 'Загрузить еще' }}
+              Загрузить еще
             </button>
           </div>
         </div>
@@ -170,26 +151,22 @@
 </template>
 
 <script setup>
-// Импорт функций и компонентов
 import { ref, computed, onMounted, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProductStore } from '@/stores/productStore'
 import ProductCard from '@/components/main/ProductCard.vue'
 import ShopFilters from '@/components/shop/ShopFilters.vue'
 
-// Роутер и хранилище
 const router = useRouter()
 const productStore = useProductStore()
 
-// Кол-во продуктов за раз и сортировка
+// Состояние
 const itemsPerLoad = 9
 const displayedCount = ref(itemsPerLoad)
 const currentSort = ref('default')
-
-// Мобильные фильтры
 const showMobileFilters = ref(false)
+const isLoading = computed(() => productStore.isLoading)
 
-// Активные фильтры
 const activeFilters = reactive({
   categories: [],
   priceRange: { min: null, max: null },
@@ -197,125 +174,86 @@ const activeFilters = reactive({
   sizes: [],
 })
 
-// Применение фильтров
-const handleApplyFilters = (newFilters) => {
-  Object.assign(activeFilters, newFilters)
-  displayedCount.value = itemsPerLoad
-}
-
-// Статус загрузки
-const isLoading = computed(() => productStore.isLoading)
-
-// Фильтрованные продукты (основной фильтр)
+// Фильтрация товаров
 const filteredProducts = computed(() => {
-  let products = [...productStore.allProducts]
-  if (activeFilters.categories.length > 0) {
-    products = products.filter((p) => {
-      const productCategory = (p.category || p.dress_style || '').toLowerCase()
-      return activeFilters.categories.includes(productCategory)
-    })
-  }
-  if (activeFilters.priceRange.min !== null && activeFilters.priceRange.min !== '') {
-    products = products.filter((p) => p.price >= Number(activeFilters.priceRange.min))
-  }
-  if (activeFilters.priceRange.max !== null && activeFilters.priceRange.max !== '') {
-    products = products.filter((p) => p.price <= Number(activeFilters.priceRange.max))
-  }
-  if (activeFilters.colors.length > 0) {
-    products = products.filter(
-      (p) =>
-        p.colors && p.colors.some((colorOption) => activeFilters.colors.includes(colorOption.hex)),
-    )
-  }
-  if (activeFilters.sizes.length > 0) {
-    products = products.filter(
-      (p) =>
-        p.availableSizes &&
-        p.availableSizes.some((sizeOption) => activeFilters.sizes.includes(sizeOption)),
-    )
-  }
-  return products
+  return productStore.allProducts.filter((product) => {
+    // Фильтр по категории
+    if (activeFilters.categories.length > 0) {
+      if (!activeFilters.categories.includes(product.category)) {
+        return false
+      }
+    }
+
+    // Фильтр по цене
+    if (activeFilters.priceRange.min !== null && product.price < activeFilters.priceRange.min) {
+      return false
+    }
+    if (activeFilters.priceRange.max !== null && product.price > activeFilters.priceRange.max) {
+      return false
+    }
+
+    // Фильтр по цвету
+    if (activeFilters.colors.length > 0) {
+      const productColors = product.colors.map((c) => c.hex)
+      if (!activeFilters.colors.some((color) => productColors.includes(color))) {
+        return false
+      }
+    }
+
+    // Фильтр по размеру
+    if (activeFilters.sizes.length > 0) {
+      const productSizes = product.sizes.map((s) => s.size)
+      if (!activeFilters.sizes.some((size) => productSizes.includes(size))) {
+        return false
+      }
+    }
+
+    return true
+  })
 })
 
-// Отсортированные продукты
+// Сортировка товаров
 const filteredAndSortedProducts = computed(() => {
-  const productsToSort = [...filteredProducts.value]
+  const products = [...filteredProducts.value]
+
   switch (currentSort.value) {
     case 'price_asc':
-      return productsToSort.sort((a, b) => a.price - b.price)
+      return products.sort((a, b) => a.price - b.price)
     case 'price_desc':
-      return productsToSort.sort((a, b) => b.price - a.price)
+      return products.sort((a, b) => b.price - a.price)
     case 'rating_desc':
-      return productsToSort.sort((a, b) => (b.rating || 0) - (a.rating || 0))
+      return products.sort((a, b) => b.rating - a.rating)
     case 'name_asc':
-      return productsToSort.sort((a, b) => a.name.localeCompare(b.name))
+      return products.sort((a, b) => a.name.localeCompare(b.name))
     default:
-      return productsToSort
+      return products
   }
 })
 
-// Список продуктов для отображения (берёт только часть из отфильтрованных и отсортированных)
+// Пагинация
 const paginatedProducts = computed(() => {
   return filteredAndSortedProducts.value.slice(0, displayedCount.value)
 })
 
-// Возможность загрузить еще
-const canLoadMorePaginated = computed(() => {
-  return !isLoading.value && displayedCount.value < filteredAndSortedProducts.value.length
+const canLoadMore = computed(() => {
+  return displayedCount.value < filteredAndSortedProducts.value.length
 })
 
-// Загрузка дополнительных продуктов
-const loadMorePaginatedProducts = () => {
-  if (canLoadMorePaginated.value) {
-    displayedCount.value += itemsPerLoad
-  }
+// Методы
+const handleApplyFilters = (newFilters) => {
+  Object.assign(activeFilters, newFilters)
+  displayedCount.value = itemsPerLoad
+  showMobileFilters.value = false
 }
 
-// Переход на страницу продукта
+const loadMoreProducts = () => {
+  displayedCount.value += itemsPerLoad
+}
+
 const handleSelectProduct = (product) => {
   router.push({ name: 'ProductDetail', params: { id: product.id } })
 }
 
-// Проверка активных фильтров
-const hasActiveFilters = computed(() => {
-  const defaultMin =
-    productStore.allProducts.length > 0
-      ? Math.floor(Math.min(...productStore.allProducts.map((p) => p.price)) / 100) * 100
-      : 0
-  const defaultMax =
-    productStore.allProducts.length > 0
-      ? Math.ceil(Math.max(...productStore.allProducts.map((p) => p.price)) / 100) * 100
-      : 10000
-
-  return (
-    activeFilters.categories.length > 0 ||
-    activeFilters.colors.length > 0 ||
-    activeFilters.sizes.length > 0 ||
-    activeFilters.priceRange.min !== defaultMin ||
-    activeFilters.priceRange.max !== defaultMax
-  )
-})
-
-// Сброс фильтров
-const clearAllActiveFilters = () => {
-  const defaultMin =
-    productStore.allProducts.length > 0
-      ? Math.floor(Math.min(...productStore.allProducts.map((p) => p.price)) / 100) * 100
-      : 0
-  const defaultMax =
-    productStore.allProducts.length > 0
-      ? Math.ceil(Math.max(...productStore.allProducts.map((p) => p.price)) / 100) * 100
-      : 10000
-
-  handleApplyFilters({
-    categories: [],
-    priceRange: { min: defaultMin, max: defaultMax },
-    colors: [],
-    sizes: [],
-  })
-}
-
-// Загрузка продуктов при монтировании
 onMounted(() => {
   if (productStore.allProducts.length === 0) {
     productStore.fetchAllProducts()

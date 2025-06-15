@@ -33,15 +33,12 @@ import ProductCard from './ProductCard.vue'
 defineProps({
   title: {
     type: String,
-    required: true,
   },
   products: {
     type: Array,
-    required: true,
   },
   canLoadMore: {
     type: Boolean,
-    default: false,
   },
 })
 

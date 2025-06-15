@@ -11,16 +11,16 @@
           </h1>
 
           <p class="mt-6 text-base text-gray-600">
-            Ознакомьтесь с нашим разнообразным ассортиментом тщательно подобранной<br />одежды,созданной
-            для того, чтобы подчеркнуть вашу индивидуальность.
+            Ознакомьтесь с нашим разнообразным ассортиментом тщательно подобранной<br />одежды,
+            созданной для того, чтобы подчеркнуть вашу индивидуальность.
           </p>
 
-          <button
-            @click="navigateToShop"
-            class="mt-8 rounded-full bg-black px-14 py-4 font-medium text-white transition-colors hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
+          <router-link
+            to="/shop"
+            class="mt-10 rounded-full bg-black px-14 py-4 font-medium text-white transition-colors hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 inline-block"
           >
             Купить сейчас
-          </button>
+          </router-link>
 
           <div
             class="mt-12 flex flex-wrap items-center justify-center gap-6 lg:justify-start lg:gap-8"
@@ -47,27 +47,5 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
 import heroImageURL from '@/assets/images/hero-fashion-model.jpg'
-
-const router = useRouter()
-
-const navigateToShop = () => {
-  router.push({ name: 'Shop' })
-}
 </script>
-
-<style scoped>
-/* Адаптивная высота для разных экранов */
-@media (max-width: 640px) {
-  section {
-    min-height: 62vh;
-  }
-}
-
-@media (min-width: 641px) and (max-width: 1024px) {
-  section {
-    min-height: 67vh;
-  }
-}
-</style>

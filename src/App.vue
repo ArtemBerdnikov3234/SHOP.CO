@@ -1,10 +1,6 @@
 <template>
   <div id="app-root" class="flex flex-col min-h-screen bg-white">
-    <AppHeader
-      @search="handleGlobalSearch"
-      @toggle-cart="toggleGlobalCart"
-      @toggle-profile="toggleGlobalProfile"
-    />
+    <AppHeader />
     <main class="flex-grow">
       <router-view v-slot="{ Component }">
         <keep-alive>
