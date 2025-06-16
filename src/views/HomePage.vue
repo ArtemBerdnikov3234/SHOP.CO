@@ -18,7 +18,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useProductStore } from '@/stores/productStore'
+import { useProductStore } from '@/stores/productStore' // Убедитесь, что путь верный
 import HeroSection from '@/components/main/HeroSection.vue'
 import BrandsSection from '@/components/main/BrandsSection.vue'
 import ProductsSection from '@/components/main/ProductsSection.vue'
@@ -29,22 +29,21 @@ const productStore = useProductStore()
 
 onMounted(() => {
   if (productStore.products.length === 0) {
-    productStore.fetchAllProducts()
+    productStore.fetchProducts()
   }
 })
 
 const itemsPerLoad = 8
-
 const displayedCount = ref(itemsPerLoad)
 
 const isLoading = computed(() => productStore.isLoading)
 
 const displayedProducts = computed(() => {
-  return productStore.allProducts.slice(0, displayedCount.value)
+  return productStore.products.slice(0, displayedCount.value)
 })
 
 const canLoadMore = computed(() => {
-  return !isLoading.value && displayedCount.value < productStore.allProducts.length
+  return !isLoading.value && displayedCount.value < productStore.products.length
 })
 
 const loadMoreProducts = () => {

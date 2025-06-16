@@ -14,8 +14,8 @@
 
 <script setup>
 defineProps({
-  colors: { type: Array, required: true },
-  modelValue: { type: String, required: true },
+  colors: { type: Array },
+  modelValue: { type: String },
 })
 
 defineEmits(['update:modelValue'])
