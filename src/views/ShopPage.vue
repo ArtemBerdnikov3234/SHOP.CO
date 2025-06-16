@@ -174,9 +174,13 @@ const activeFilters = reactive({
   sizes: [],
 })
 
-// Фильтрация товаров
+// This part was already correct.
 const filteredProducts = computed(() => {
-  return productStore.allProducts.filter((product) => {
+  if (!productStore.products) {
+    return []
+  }
+
+  return productStore.products.filter((product) => {
     // Фильтр по категории
     if (activeFilters.categories.length > 0) {
       if (!activeFilters.categories.includes(product.category)) {
@@ -212,7 +216,6 @@ const filteredProducts = computed(() => {
   })
 })
 
-// Сортировка товаров
 const filteredAndSortedProducts = computed(() => {
   const products = [...filteredProducts.value]
 
@@ -230,7 +233,6 @@ const filteredAndSortedProducts = computed(() => {
   }
 })
 
-// Пагинация
 const paginatedProducts = computed(() => {
   return filteredAndSortedProducts.value.slice(0, displayedCount.value)
 })
@@ -239,7 +241,6 @@ const canLoadMore = computed(() => {
   return displayedCount.value < filteredAndSortedProducts.value.length
 })
 
-// Методы
 const handleApplyFilters = (newFilters) => {
   Object.assign(activeFilters, newFilters)
   displayedCount.value = itemsPerLoad
@@ -254,9 +255,11 @@ const handleSelectProduct = (product) => {
   router.push({ name: 'ProductDetail', params: { id: product.id } })
 }
 
+// FIX: Corrected the onMounted hook to use the correct names
 onMounted(() => {
-  if (productStore.allProducts.length === 0) {
-    productStore.fetchAllProducts()
+  // The store already fetches on initialization. This is a defensive check.
+  if (productStore.products.length === 0 && !productStore.isLoading) {
+    productStore.fetchProducts()
   }
 })
 </script>
