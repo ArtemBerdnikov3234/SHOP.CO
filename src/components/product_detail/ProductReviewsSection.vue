@@ -93,7 +93,7 @@ const sortOptions = ref([
 ])
 const currentSortOption = ref(sortOptions.value[0])
 const sortDropdownOpen = ref(false)
-const reviewsPerPage = ref(3) // Количество отзывов на "странице"
+const reviewsPerPage = ref(3)
 const displayedReviewsCount = ref(reviewsPerPage.value)
 
 const sortedReviews = computed(() => {

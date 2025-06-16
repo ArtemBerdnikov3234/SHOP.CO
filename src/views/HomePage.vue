@@ -18,7 +18,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useProductStore } from '@/stores/productStore' // Убедитесь, что путь верный
+import { useProductStore } from '@/stores/productStore'
 import HeroSection from '@/components/main/HeroSection.vue'
 import BrandsSection from '@/components/main/BrandsSection.vue'
 import ProductsSection from '@/components/main/ProductsSection.vue'

@@ -134,7 +134,7 @@
 
 <script setup>
 import { reactive, computed, ref } from 'vue'
-// The store path might be different in your project, but the import is correct.
+
 import { useProductStore } from '@/stores/productStore'
 
 const emit = defineEmits(['apply-filters', 'close-filters'])
@@ -149,7 +149,6 @@ const activeFilters = reactive({
 
 const showAllCategories = ref(false)
 
-// FIX: Changed allProducts to products
 const availableCategories = computed(() => {
   if (!productStore.products) return []
   return Array.from(new Set(productStore.products.map((product) => product.category))).sort()
@@ -159,7 +158,6 @@ const displayedCategories = computed(() =>
   showAllCategories.value ? availableCategories.value : availableCategories.value.slice(0, 5),
 )
 
-// FIX: Changed allProducts to products
 const allPrices = computed(() => {
   if (!productStore.products || productStore.products.length === 0) return [0]
   return productStore.products.map((p) => p.price)
@@ -168,7 +166,6 @@ const allPrices = computed(() => {
 const minPrice = computed(() => Math.min(...allPrices.value))
 const maxPrice = computed(() => Math.max(...allPrices.value))
 
-// FIX: Changed allProducts to products
 const availableColors = computed(() => {
   if (!productStore.products) return []
   const allColors = productStore.products.flatMap((p) => p.colors)
@@ -176,7 +173,6 @@ const availableColors = computed(() => {
   return Array.from(uniqueColorsMap.values())
 })
 
-// FIX: Changed allProducts to products
 const availableSizes = computed(() => {
   if (!productStore.products) return []
   const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
